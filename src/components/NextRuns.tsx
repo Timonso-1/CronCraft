@@ -31,6 +31,13 @@ function dayLabel(date: string, today: string, tomorrow: string, locale: Locale,
   }).format(new Date(Date.UTC(y, m - 1, d)));
 }
 
+function shortDate(date: string, locale: Locale) {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Intl.DateTimeFormat(locale, { timeZone: "UTC", day: "numeric", month: "numeric" }).format(
+    new Date(Date.UTC(y, m - 1, d)),
+  );
+}
+
 function shortZone(tz: string) {
   return tz.split("/").pop()!.replace(/_/g, " ");
 }
@@ -39,12 +46,11 @@ export function NextRuns(props: Props) {
   const { expression, timezones, onTimezonesChange, count, onCountChange, now, locale, t } = props;
   const [primary, ...others] = timezones;
 
-  const results = useMemo(
-    () => timezones.map((tz) => nextExecutions(expression, { timezone: tz, count, from: new Date(now) })),
-    [expression, timezones, count, now],
+  // Der Ausdruck läuft in der ersten Zeitzone; weitere Zonen zeigen denselben Zeitpunkt umgerechnet.
+  const main = useMemo(
+    () => nextExecutions(expression, { timezone: primary, count, from: new Date(now) }),
+    [expression, primary, count, now],
   );
-
-  const main = results[0];
   const today = formatLocal(now, primary).slice(0, 10);
   const tomorrow = formatLocal(now + 86_400_000, primary).slice(0, 10);
 
@@ -93,7 +99,9 @@ export function NextRuns(props: Props) {
       </div>
 
       <div className="space-y-2">
+        <p className="text-sm font-medium">{t.timezone}</p>
         <TimezoneSelect value={primary} onChange={(v) => setZone(0, v)} label={t.timezone} className="w-full" />
+        {others.length > 0 && <p className="pt-1 text-sm font-medium">{t.compareWith}</p>}
         {others.map((tz, i) => (
           <div key={i} className="flex gap-2">
             <TimezoneSelect value={tz} onChange={(v) => setZone(i + 1, v)} label={t.timezone} className="w-full" />
@@ -137,15 +145,14 @@ export function NextRuns(props: Props) {
               <ul className="divide-y divide-rule border-y border-rule">
                 {runs.map((r) => (
                   <li key={r.ts} className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-2">
-                    <span className="font-mono text-base tabular-nums">{time(main!.ok ? main.executions[r.index].local : "")}</span>
+                    <span className="font-mono text-base tabular-nums">{time(main.ok ? main.executions[r.index].local : "")}</span>
                     {others.map((tz, j) => {
-                      const res = results[j + 1];
-                      const local = res?.ok ? res.executions[r.index]?.local : undefined;
+                      const local = formatLocal(r.ts, tz);
                       return (
                         <span key={tz + j} className="text-sm text-ink-soft">
-                          {shortZone(tz)} <span className="font-mono tabular-nums text-ink">{local ? time(local) : "-"}</span>
-                          {local && local.slice(0, 10) !== date && (
-                            <span className="ml-1 text-xs">({local.slice(8, 10)}.{local.slice(5, 7)}.)</span>
+                          {shortZone(tz)} <span className="font-mono tabular-nums text-ink">{time(local)}</span>
+                          {local.slice(0, 10) !== date && (
+                            <span className="ml-1 text-xs">({shortDate(local.slice(0, 10), locale)})</span>
                           )}
                         </span>
                       );
