@@ -15,18 +15,11 @@ interface Props {
 }
 
 /** Großes Eingabefeld, in dem jedes Cron-Feld in seiner Farbe erscheint. */
-export function ExpressionHero({
-  expression,
-  onChange,
-  description,
-  activeField,
-  t,
-}: Props) {
+export function ExpressionHero({ expression, onChange, description, activeField, t }: Props) {
   const tokens = useMemo(() => tokenizeExpression(expression), [expression]);
   const backdrop = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const fieldTokens = tokens.filter((tk) => tk.field);
-  const editable = fieldTokens.length === 5;
+  const editable = tokens.filter((tk) => tk.field).length === 5;
 
   const copy = async () => {
     try {
@@ -38,33 +31,26 @@ export function ExpressionHero({
     }
   };
 
-  const inputText =
-    "px-5 py-4 font-mono text-[clamp(1.75rem,6vw,3.5rem)] leading-none tracking-tight sm:px-7 sm:py-6";
+  const textBox = "px-5 py-5 font-mono text-[clamp(1.6rem,5vw,2.75rem)] leading-none tracking-tight";
 
   return (
-    <section aria-labelledby="expr-label" className="space-y-5">
-      <div className="flex items-baseline justify-between gap-4">
-        <label id="expr-label" htmlFor="expr" className="text-sm font-semibold">
-          {t.expression}
-        </label>
-        <span className="hidden text-sm text-ink-soft sm:inline">{t.expressionHint}</span>
-      </div>
-
+    <div className="space-y-3">
+      <label htmlFor="expr" className="sr-only">
+        {t.expression}
+      </label>
       <div
-        className={`relative rounded-[20px] border-2 bg-sheet transition-colors ${
-          description.ok ? "border-ink/80" : "border-danger"
+        className={`relative rounded-xl border bg-sheet transition-colors focus-within:border-accent/70 ${
+          description.ok ? "border-rule" : "border-danger/70"
         }`}
       >
-        <div
-          ref={backdrop}
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 overflow-hidden whitespace-pre pr-32 ${inputText}`}
-        >
+        <div ref={backdrop} aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden whitespace-pre pr-32 ${textBox}`}>
           {tokens.map((tk, i) => (
             <span
               key={i}
               style={fieldStyle(tk.field)}
-              className={`text-(--c) ${tk.field && tk.field === activeField && editable ? "underline decoration-4 underline-offset-[10px]" : ""}`}
+              className={`text-(--c) ${
+                editable && tk.field === activeField ? "underline decoration-2 underline-offset-8" : ""
+              }`}
             >
               {tk.text}
             </span>
@@ -81,32 +67,29 @@ export function ExpressionHero({
           autoComplete="off"
           aria-invalid={!description.ok}
           aria-describedby="expr-meaning"
-          className={`relative block w-full bg-transparent pr-32 text-transparent caret-ink outline-none ${inputText}`}
+          className={`relative block w-full bg-transparent pr-32 text-transparent caret-ink outline-none ${textBox}`}
         />
         <button
           type="button"
           onClick={copy}
-          className="absolute top-1/2 right-3 -translate-y-1/2 rounded-[10px] bg-ink px-4 py-2 text-sm font-semibold text-paper hover:opacity-90 sm:right-5"
+          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-black hover:brightness-110"
         >
           {copied ? t.copied : t.copy}
         </button>
       </div>
 
-
-      <p
-        id="expr-meaning"
-        aria-live="polite"
-        className={`max-w-[40ch] text-[clamp(1.4rem,3vw,2.1rem)] leading-tight font-semibold tracking-tight text-balance ${
-          description.ok ? "" : "text-danger"
-        }`}
-      >
-        {description.ok ? description.text : t.invalid}
-      </p>
-      {!description.ok && (
-        <p className="-mt-3 text-sm text-ink-soft">
-          {description.text}. {t.invalidHelp}
-        </p>
-      )}
-    </section>
+      <div id="expr-meaning" aria-live="polite" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
+        {description.ok ? (
+          <p className="text-lg font-medium">{description.text}</p>
+        ) : (
+          <>
+            <p className="text-lg font-medium text-danger">{t.invalid}</p>
+            <p className="text-sm text-ink-soft">
+              {description.text}. {t.invalidHelp}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

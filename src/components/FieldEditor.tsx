@@ -20,7 +20,7 @@ interface Props {
 }
 
 const control =
-  "rounded-[10px] border border-rule bg-paper px-3 py-2 font-mono text-sm text-ink focus:border-(--c) outline-none";
+  "rounded-lg border border-rule bg-paper px-3 py-2 font-mono text-sm text-ink focus:border-(--c) outline-none";
 
 export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
   const mode = detectMode(value);
@@ -64,7 +64,7 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
 
   return (
     <div className="space-y-4">
-      <div role="radiogroup" aria-label={t[fieldKey]} className="inline-flex rounded-[10px] bg-paper p-1">
+      <div role="radiogroup" aria-label={t[fieldKey]} className="inline-flex rounded-lg border border-rule bg-paper p-1">
         {modes.map((m) => (
           <button
             key={m.id}
@@ -72,8 +72,8 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
             role="radio"
             aria-checked={mode === m.id}
             onClick={() => setMode(m.id)}
-            className={`rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === m.id ? "bg-(--c) text-sheet" : "text-ink-soft hover:text-ink"
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              mode === m.id ? "bg-sheet-2 text-ink shadow-[inset_0_0_0_1px_var(--rule)]" : "text-ink-soft hover:text-ink"
             }`}
           >
             {m.label}
@@ -109,8 +109,10 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggle(n)}
-                  className={`rounded-[8px] py-2 text-sm tabular-nums transition-colors ${
-                    on ? "bg-(--c) font-semibold text-sheet" : "bg-paper text-ink hover:bg-(--c)/15"
+                  className={`rounded-md border py-2 text-sm tabular-nums transition-colors ${
+                    on
+                      ? "border-(--c)/60 bg-(--c)/15 font-semibold text-(--c)"
+                      : "border-rule bg-paper text-ink-soft hover:border-(--c)/40 hover:text-ink"
                   }`}
                 >
                   {labelFor(n)}

@@ -3,6 +3,7 @@
 import { FIELD_KEYS, type CronFields, type FieldKey } from "@/lib/cron/builder";
 import { fieldStyle } from "@/lib/fieldColor";
 import type { Messages } from "@/lib/i18n";
+import { Card } from "./Card";
 import { FieldEditor } from "./FieldEditor";
 
 interface Props {
@@ -16,15 +17,12 @@ interface Props {
 /** Feld-Editor mit Reitern; die Reiter tragen die Farben aus dem Ausdruck. */
 export function Builder({ fields, onChange, active, onActiveChange, t }: Props) {
   return (
-    <section aria-labelledby="builder-title" className="space-y-4">
-      <h2 id="builder-title" className="text-xl font-semibold tracking-tight">
-        {t.builder}
-      </h2>
+    <Card id="editor" title={t.builder} subtitle={t.builderSub} bodyClassName="">
       {!fields ? (
-        <p className="text-ink-soft">{t.builderNeedsFive}</p>
+        <p className="p-5 text-sm text-ink-soft">{t.builderNeedsFive}</p>
       ) : (
-        <div style={fieldStyle(active)} className="rounded-[16px] border border-rule bg-sheet">
-          <div role="tablist" aria-label={t.builder} className="flex overflow-x-auto border-b border-rule">
+        <div style={fieldStyle(active)}>
+          <div role="tablist" aria-label={t.builder} className="flex overflow-x-auto border-b border-rule px-2">
             {FIELD_KEYS.map((key) => {
               const selected = key === active;
               return (
@@ -37,28 +35,21 @@ export function Builder({ fields, onChange, active, onActiveChange, t }: Props) 
                   aria-controls="field-panel"
                   onClick={() => onActiveChange(key)}
                   style={fieldStyle(key)}
-                  className={`-mb-px flex shrink-0 flex-col items-start border-b-[3px] px-4 pt-3 pb-2 text-left transition-colors ${
-                    selected ? "border-(--c)" : "border-transparent hover:border-(--c)/40"
+                  className={`-mb-px flex shrink-0 flex-col items-start gap-0.5 border-b-2 px-3 pt-3 pb-2.5 text-left transition-colors ${
+                    selected ? "border-(--c)" : "border-transparent hover:border-rule"
                   }`}
                 >
-                  <span className={`text-sm ${selected ? "font-semibold text-ink" : "text-ink-soft"}`}>
-                    {t[key]}
-                  </span>
-                  <span className="font-mono text-xs text-(--c)">{fields[key]}</span>
+                  <span className={`text-sm ${selected ? "font-medium text-ink" : "text-ink-soft"}`}>{t[key]}</span>
+                  <span className="rounded bg-(--c)/10 px-1.5 font-mono text-xs text-(--c)">{fields[key]}</span>
                 </button>
               );
             })}
           </div>
           <div id="field-panel" role="tabpanel" aria-labelledby={`tab-${active}`} className="p-5">
-            <FieldEditor
-              fieldKey={active}
-              value={fields[active]}
-              onChange={(v) => onChange({ ...fields, [active]: v })}
-              t={t}
-            />
+            <FieldEditor fieldKey={active} value={fields[active]} onChange={(v) => onChange({ ...fields, [active]: v })} t={t} />
           </div>
         </div>
       )}
-    </section>
+    </Card>
   );
 }
