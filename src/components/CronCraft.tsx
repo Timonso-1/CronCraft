@@ -26,7 +26,7 @@ export function CronCraft() {
   const [locale, setLocale] = useState<Locale>("de");
   const [expression, setExpression] = useState(DEFAULT_EXPRESSION);
   const [timezones, setTimezones] = useState<string[]>(["UTC"]);
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(5);
   const [activeField, setActiveField] = useState<FieldKey>("hour");
   const [now, setNow] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
