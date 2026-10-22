@@ -52,7 +52,7 @@ export function CronCraft() {
     try {
       return { ok: true as const, text: describeCron(expression, locale) };
     } catch (e) {
-      return { ok: false as const, text: e instanceof Error ? e.message : String(e) };
+      return { ok: false as const, text: (e instanceof Error ? e.message : String(e)).replace(/^Error:\s*/, "") };
     }
   }, [expression, locale]);
 
