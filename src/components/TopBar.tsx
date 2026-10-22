@@ -10,9 +10,10 @@ interface Props {
 
 export function TopBar({ locale, onLocaleChange, t }: Props) {
   const links = [
-    { href: "#editor", label: t.navEditor },
-    { href: "#runs", label: t.navRuns },
-    { href: "#week", label: t.navWeek },
+    { href: "#step-1", label: t.navEditor },
+    { href: "#step-2", label: t.navRuns },
+    { href: "#step-3", label: t.navWeek },
+    { href: "#syntax", label: t.navSyntax },
   ];
   return (
     <header className="sticky top-0 z-20 border-b border-rule bg-paper/80 backdrop-blur">

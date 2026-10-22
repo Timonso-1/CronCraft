@@ -2,8 +2,12 @@
 
 import { Builder } from "@/components/Builder";
 import { ExpressionHero } from "@/components/ExpressionHero";
+import { FieldLegend } from "@/components/FieldLegend";
+import { Footer } from "@/components/Footer";
 import { NextRuns } from "@/components/NextRuns";
 import { Stats } from "@/components/Stats";
+import { Step } from "@/components/Step";
+import { SyntaxHelp } from "@/components/SyntaxHelp";
 import { TopBar } from "@/components/TopBar";
 import { WeekGrid } from "@/components/WeekGrid";
 import { expressionToFields, fieldsToExpression, type FieldKey } from "@/lib/cron/builder";
@@ -66,6 +70,11 @@ export function CronCraft() {
   }, [expression, locale]);
 
   const fields = useMemo(() => expressionToFields(expression), [expression]);
+
+  const selectField = (field: FieldKey) => {
+    setActiveField(field);
+    document.getElementById("editor")?.scrollIntoView({ block: "nearest" });
+  };
   const minute = Math.floor(now / 60_000);
 
   const grid = useMemo(() => {
@@ -94,12 +103,16 @@ export function CronCraft() {
               hour: "2-digit",
               minute: "2-digit",
             }).format(new Date(runs[0].timestamp))
-          : undefined,
+          : t.statNextHint,
         accent: Boolean(runs[0]),
       },
-      { label: t.statToday, value: grid ? fmt(sum(grid[0].hours)) : "-" },
-      { label: t.statWeek, value: grid ? fmt(grid.reduce((a, d) => a + sum(d.hours), 0)) : "-", hint: primary },
-      { label: t.statGap, value: runs.length === 2 ? formatDuration(runs[1].timestamp - runs[0].timestamp, locale) : "-" },
+      { label: t.statToday, value: grid ? fmt(sum(grid[0].hours)) : "-", hint: t.statTodayHint },
+      { label: t.statWeek, value: grid ? fmt(grid.reduce((a, d) => a + sum(d.hours), 0)) : "-", hint: t.statWeekHint },
+      {
+        label: t.statGap,
+        value: runs.length === 2 ? formatDuration(runs[1].timestamp - runs[0].timestamp, locale) : "-",
+        hint: t.statGapHint,
+      },
     ];
   }, [expression, primary, now, locale, grid, t]);
 
@@ -115,7 +128,7 @@ export function CronCraft() {
     <>
       <TopBar locale={locale} onLocaleChange={setLocale} t={t} />
 
-      <main className="mx-auto max-w-7xl space-y-8 px-4 pt-8 pb-20 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-14 px-4 pt-8 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -128,59 +141,80 @@ export function CronCraft() {
           </p>
         </div>
 
-        <ExpressionHero expression={expression} onChange={setExpression} description={description} activeField={activeField} t={t} />
+        <Step number={1} title={t.step1Title} subtitle={t.step1Sub}>
+          <ExpressionHero expression={expression} onChange={setExpression} description={description} activeField={activeField} t={t} />
 
-        <nav aria-label={t.presets} className="-mt-2">
-          <ul className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-xs font-medium tracking-wider text-ink-soft uppercase">{t.presetsLabel}</span>
             {PRESETS.map((p) => {
               const active = p.expression === expression.trim();
               return (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setExpression(p.expression)}
-                    className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                      active
-                        ? "border-accent/40 bg-accent/10 text-accent"
-                        : "border-rule bg-sheet text-ink-soft hover:border-ink-soft/40 hover:text-ink"
-                    }`}
-                  >
-                    {p.label[locale]}
-                  </button>
-                </li>
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setExpression(p.expression)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                    active
+                      ? "border-accent/40 bg-accent/10 text-accent"
+                      : "border-rule bg-sheet text-ink-soft hover:border-ink-soft/40 hover:text-ink"
+                  }`}
+                >
+                  {p.label[locale]}
+                </button>
               );
             })}
-          </ul>
-        </nav>
-
-        {description.ok && <Stats items={stats} />}
-
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="min-w-0 space-y-6 lg:col-span-7">
-            <Builder
-              fields={fields}
-              onChange={(f) => setExpression(fieldsToExpression(f))}
-              active={activeField}
-              onActiveChange={setActiveField}
-              t={t}
-            />
-            {description.ok && grid && <WeekGrid grid={grid} timezone={primary} t={t} />}
           </div>
-          <div className="min-w-0 lg:col-span-5">
-            <NextRuns
-              expression={expression}
-              timezones={timezones}
-              onTimezonesChange={setTimezones}
-              count={count}
-              onCountChange={setCount}
-              now={now}
-              locale={locale}
-              t={t}
-            />
+
+          <FieldLegend expression={expression} activeField={activeField} onSelectField={selectField} t={t} />
+        </Step>
+
+        <Step number={2} title={t.step2Title} subtitle={t.step2Sub}>
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="min-w-0 lg:col-span-7">
+              <Builder
+                fields={fields}
+                onChange={(f) => setExpression(fieldsToExpression(f))}
+                active={activeField}
+                onActiveChange={setActiveField}
+                t={t}
+              />
+            </div>
+            <div className="min-w-0 lg:col-span-5">
+              <SyntaxHelp onTry={setExpression} t={t} />
+            </div>
           </div>
-        </div>
+        </Step>
+
+        <Step number={3} title={t.step3Title} subtitle={t.step3Sub}>
+          {description.ok ? (
+            <>
+              <Stats items={stats} />
+              <div className="grid gap-6 lg:grid-cols-12">
+                <div className="min-w-0 lg:col-span-7">{grid && <WeekGrid grid={grid} timezone={primary} t={t} />}</div>
+                <div className="min-w-0 lg:col-span-5">
+                  <NextRuns
+                    expression={expression}
+                    timezones={timezones}
+                    onTimezonesChange={setTimezones}
+                    count={count}
+                    onCountChange={setCount}
+                    now={now}
+                    locale={locale}
+                    t={t}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="rounded-xl border border-danger/40 bg-danger/5 px-5 py-4 text-sm text-ink-soft">
+              {t.invalidHelp}
+            </p>
+          )}
+        </Step>
       </main>
+
+      <Footer timezone={primary} locale={locale} t={t} />
     </>
   );
 }
