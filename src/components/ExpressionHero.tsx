@@ -11,7 +11,6 @@ interface Props {
   onChange: (value: string) => void;
   description: { ok: boolean; text: string };
   activeField: FieldKey;
-  onSelectField: (field: FieldKey) => void;
   t: Messages;
 }
 
@@ -21,7 +20,6 @@ export function ExpressionHero({
   onChange,
   description,
   activeField,
-  onSelectField,
   t,
 }: Props) {
   const tokens = useMemo(() => tokenizeExpression(expression), [expression]);
@@ -94,31 +92,6 @@ export function ExpressionHero({
         </button>
       </div>
 
-      {fieldTokens.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {fieldTokens.map((tk, i) => {
-            const field = tk.field!;
-            const selectable = editable && field !== "second";
-            const active = selectable && field === activeField;
-            return (
-              <button
-                key={i}
-                type="button"
-                disabled={!selectable}
-                aria-pressed={active}
-                onClick={() => selectable && onSelectField(field as FieldKey)}
-                style={fieldStyle(field)}
-                className={`flex min-w-24 flex-col items-start rounded-[10px] border-l-4 border-(--c) px-3 py-1.5 text-left transition-colors ${
-                  active ? "bg-(--c)/15" : "bg-sheet hover:bg-(--c)/10"
-                } disabled:cursor-default`}
-              >
-                <span className="text-xs font-medium text-ink-soft">{t[field]}</span>
-                <span className="font-mono text-sm text-(--c)">{tk.text}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       <p
         id="expr-meaning"

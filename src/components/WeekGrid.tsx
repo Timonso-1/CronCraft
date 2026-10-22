@@ -41,15 +41,15 @@ export function WeekGrid({ expression, timezone, now, t }: Props) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border-separate border-spacing-[3px]">
+        <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-[3px]">
           <caption className="sr-only">
             {t.week} ({timezone})
           </caption>
           <thead>
             <tr>
-              <th scope="col" className="w-16" />
+              <th scope="col" className="w-14" />
               {Array.from({ length: 24 }, (_, h) => (
-                <th key={h} scope="col" className="text-left font-mono text-[11px] font-normal text-ink-soft">
+                <th key={h} scope="col" className="text-left font-mono text-[11px] font-normal text-ink-soft overflow-visible whitespace-nowrap">
                   {h % 3 === 0 ? String(h).padStart(2, "0") : ""}
                 </th>
               ))}

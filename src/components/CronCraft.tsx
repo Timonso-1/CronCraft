@@ -95,11 +95,10 @@ export function CronCraft() {
           onChange={setExpression}
           description={description}
           activeField={activeField}
-          onSelectField={setActiveField}
           t={t}
         />
 
-        <nav aria-label={t.presets} className="-mt-6">
+        <nav aria-label={t.presets} className="-mt-8">
           <ul className="flex flex-wrap gap-2">
             {PRESETS.map((p) => {
               const active = p.expression === expression.trim();
@@ -122,7 +121,7 @@ export function CronCraft() {
         </nav>
 
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-7">
+          <div className="space-y-14 lg:col-span-7">
             <Builder
               fields={fields}
               onChange={(f) => setExpression(fieldsToExpression(f))}
@@ -130,6 +129,7 @@ export function CronCraft() {
               onActiveChange={setActiveField}
               t={t}
             />
+            {description.ok && <WeekGrid expression={expression} timezone={timezones[0]} now={now} t={t} />}
           </div>
           <div className="lg:col-span-5">
             <NextRuns
@@ -145,7 +145,6 @@ export function CronCraft() {
           </div>
         </div>
 
-        {description.ok && <WeekGrid expression={expression} timezone={timezones[0]} now={now} t={t} />}
       </main>
     </div>
   );
