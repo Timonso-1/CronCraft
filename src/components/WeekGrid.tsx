@@ -14,7 +14,7 @@ interface Props {
 /** Deckkraft je Anzahl: 1 Ausführung ist klar sichtbar, 60 sind voll. */
 function intensity(n: number) {
   if (n <= 0) return 0;
-  return Math.round(40 + (60 * Math.log(n)) / Math.log(MAX_PER_HOUR));
+  return Math.round(60 + (40 * Math.log(n)) / Math.log(MAX_PER_HOUR));
 }
 
 export function WeekGrid({ expression, timezone, now, t }: Props) {

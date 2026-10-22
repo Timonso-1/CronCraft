@@ -121,7 +121,7 @@ export function CronCraft() {
         </nav>
 
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
-          <div className="space-y-14 lg:col-span-7">
+          <div className="min-w-0 space-y-14 lg:col-span-7">
             <Builder
               fields={fields}
               onChange={(f) => setExpression(fieldsToExpression(f))}
@@ -131,7 +131,7 @@ export function CronCraft() {
             />
             {description.ok && <WeekGrid expression={expression} timezone={timezones[0]} now={now} t={t} />}
           </div>
-          <div className="lg:col-span-5">
+          <div className="min-w-0 lg:col-span-5">
             <NextRuns
               expression={expression}
               timezones={timezones}
