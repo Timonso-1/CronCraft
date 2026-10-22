@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/*
+ * CronCraft Design-Tokens: dunkles Panel-Design mit grünem Akzent,
+ * je Cron-Feld ein eigener Farbton.
+ */
+:root {
+  --paper: #0a0a0a;
+  --sheet: #111111;
+  --sheet-2: #161616;
+  --ink: #ededed;
+  --ink-soft: #8f8f8f;
+  --rule: #222222;
+  --accent: #22c55e;
+  --danger: #f05252;
+
+  --f-second: #94a3b8;
+  --f-minute: #60a5fa;
+  --f-hour: #f472b6;
+  --f-dom: #2dd4bf;
+  --f-month: #a78bfa;
+  --f-dow: #fbbf24;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-sheet-2: var(--sheet-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+select option {
+  background: var(--sheet);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
