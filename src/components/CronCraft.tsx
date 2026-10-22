@@ -3,12 +3,17 @@
 import { Builder } from "@/components/Builder";
 import { ExpressionHero } from "@/components/ExpressionHero";
 import { NextRuns } from "@/components/NextRuns";
+import { Stats } from "@/components/Stats";
+import { TopBar } from "@/components/TopBar";
 import { WeekGrid } from "@/components/WeekGrid";
 import { expressionToFields, fieldsToExpression, type FieldKey } from "@/lib/cron/builder";
 import { describeCron } from "@/lib/cron/describe";
 import { PRESETS } from "@/lib/cron/presets";
-import { isValidTimezone } from "@/lib/cron/schedule";
+import { isValidTimezone, nextExecutions } from "@/lib/cron/schedule";
+import { weekGrid } from "@/lib/cron/week";
+import { formatDuration } from "@/lib/duration";
 import { getMessages, type Locale } from "@/lib/i18n";
+import { relativeTime } from "@/lib/relative";
 import { useEffect, useMemo, useState } from "react";
 
 const DEFAULT_EXPRESSION = "0 9 * * 1-5";
@@ -22,6 +27,7 @@ export function CronCraft() {
   const [now, setNow] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
   const t = getMessages(locale);
+  const primary = timezones[0];
 
   // Initialwerte aus URL bzw. Browser-Zeitzone laden
   useEffect(() => {
@@ -60,45 +66,62 @@ export function CronCraft() {
   }, [expression, locale]);
 
   const fields = useMemo(() => expressionToFields(expression), [expression]);
+  const minute = Math.floor(now / 60_000);
+
+  const grid = useMemo(() => {
+    try {
+      return weekGrid(expression, primary, new Date(minute * 60_000));
+    } catch {
+      return null;
+    }
+  }, [expression, primary, minute]);
+
+  const stats = useMemo(() => {
+    const next = nextExecutions(expression, { timezone: primary, count: 2, from: new Date(now) });
+    const runs = next.ok ? next.executions : [];
+    const sum = (hours: number[]) => hours.reduce((a, h) => a + Math.max(0, h), 0);
+    const fmt = (n: number) => new Intl.NumberFormat(locale).format(n);
+    return [
+      {
+        label: t.statNext,
+        value: runs[0] ? relativeTime(runs[0].timestamp, now, locale) : t.statNone,
+        hint: runs[0]?.local.slice(0, 16),
+        accent: Boolean(runs[0]),
+      },
+      { label: t.statToday, value: grid ? fmt(sum(grid[0].hours)) : "-" },
+      { label: t.statWeek, value: grid ? fmt(grid.reduce((a, d) => a + sum(d.hours), 0)) : "-", hint: primary },
+      { label: t.statGap, value: runs.length === 2 ? formatDuration(runs[1].timestamp - runs[0].timestamp, locale) : "-" },
+    ];
+  }, [expression, primary, now, locale, grid, t]);
+
+  const today = new Intl.DateTimeFormat(locale, {
+    timeZone: primary,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(now));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-6 pb-20 sm:px-8">
-      <header className="mb-10 flex items-center justify-between gap-4">
-        <p className="text-lg">
-          <span className="font-bold tracking-tight">{t.title}</span>
-          <span className="hidden text-ink-soft sm:inline"> {t.subtitle}</span>
-        </p>
-        <div role="group" aria-label={t.language} className="inline-flex rounded-[10px] bg-sheet p-1">
-          {(["de", "en"] as const).map((l) => (
-            <button
-              key={l}
-              type="button"
-              aria-pressed={locale === l}
-              onClick={() => setLocale(l)}
-              className={`rounded-[7px] px-3 py-1 text-sm font-medium ${
-                locale === l ? "bg-ink text-paper" : "text-ink-soft hover:text-ink"
-              }`}
-            >
-              {l === "de" ? "Deutsch" : "English"}
-            </button>
-          ))}
+    <>
+      <TopBar locale={locale} onLocaleChange={setLocale} t={t} />
+
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pt-8 pb-20 sm:px-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <span className="text-ink-soft">{t.headlineA}</span> {t.headlineB}
+            </h1>
+            <p className="mt-1 text-sm text-ink-soft">{t.lead}</p>
+          </div>
+          <p suppressHydrationWarning className="text-xs font-medium tracking-[0.12em] text-ink-soft uppercase">
+            {ready ? today : ""}
+          </p>
         </div>
-      </header>
 
-      <main className="space-y-14">
-        <h1 className="sr-only">
-          {t.title}: {t.subtitle}
-        </h1>
+        <ExpressionHero expression={expression} onChange={setExpression} description={description} activeField={activeField} t={t} />
 
-        <ExpressionHero
-          expression={expression}
-          onChange={setExpression}
-          description={description}
-          activeField={activeField}
-          t={t}
-        />
-
-        <nav aria-label={t.presets} className="-mt-8">
+        <nav aria-label={t.presets} className="-mt-2">
           <ul className="flex flex-wrap gap-2">
             {PRESETS.map((p) => {
               const active = p.expression === expression.trim();
@@ -108,8 +131,10 @@ export function CronCraft() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setExpression(p.expression)}
-                    className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
-                      active ? "bg-ink text-paper" : "bg-sheet text-ink hover:bg-rule"
+                    className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                      active
+                        ? "border-accent/40 bg-accent/10 text-accent"
+                        : "border-rule bg-sheet text-ink-soft hover:border-ink-soft/40 hover:text-ink"
                     }`}
                   >
                     {p.label[locale]}
@@ -120,8 +145,10 @@ export function CronCraft() {
           </ul>
         </nav>
 
-        <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
-          <div className="min-w-0 space-y-14 lg:col-span-7">
+        {description.ok && <Stats items={stats} />}
+
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="min-w-0 space-y-6 lg:col-span-7">
             <Builder
               fields={fields}
               onChange={(f) => setExpression(fieldsToExpression(f))}
@@ -129,7 +156,7 @@ export function CronCraft() {
               onActiveChange={setActiveField}
               t={t}
             />
-            {description.ok && <WeekGrid expression={expression} timezone={timezones[0]} now={now} t={t} />}
+            {description.ok && grid && <WeekGrid grid={grid} timezone={primary} t={t} />}
           </div>
           <div className="min-w-0 lg:col-span-5">
             <NextRuns
@@ -144,8 +171,7 @@ export function CronCraft() {
             />
           </div>
         </div>
-
       </main>
-    </div>
+    </>
   );
 }
