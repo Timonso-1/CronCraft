@@ -17,25 +17,24 @@ interface Props {
   value: string;
   onChange: (tz: string) => void;
   label: string;
-  id?: string;
+  className?: string;
 }
 
-export function TimezoneSelect({ value, onChange, label, id }: Props) {
+export function TimezoneSelect({ value, onChange, label, className = "" }: Props) {
   const [zones, setZones] = useState<string[]>(FALLBACK);
   useEffect(() => setZones(loadZones()), []);
   const options = zones.includes(value) ? zones : [value, ...zones];
 
   return (
     <select
-      id={id}
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-md border border-black/15 bg-background px-2 py-1.5 text-sm dark:border-white/20"
+      className={`max-w-full rounded-[10px] border border-rule bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-ink ${className}`}
     >
       {options.map((z) => (
         <option key={z} value={z}>
-          {z}
+          {z.replace(/_/g, " ")}
         </option>
       ))}
     </select>
