@@ -1,0 +1,78 @@
+import type { Locale } from "@/lib/cron/describe";
+
+export type { Locale };
+
+const messages = {
+  de: {
+    title: "CronCraft",
+    subtitle: "Cron-Ausdrücke erstellen, verstehen und testen",
+    expression: "Cron-Ausdruck",
+    expressionHint: "5 Felder (Minute Stunde Tag Monat Wochentag) oder 6 Felder mit Sekunden",
+    meaning: "Bedeutung",
+    invalid: "Ungültiger Ausdruck",
+    presets: "Vorlagen",
+    builder: "Visueller Builder",
+    minute: "Minute",
+    hour: "Stunde",
+    dayOfMonth: "Tag im Monat",
+    month: "Monat",
+    dayOfWeek: "Wochentag",
+    every: "Jede/r",
+    everyN: "Alle N",
+    specific: "Bestimmte Werte",
+    custom: "Eigener Wert",
+    step: "Schritt",
+    timezone: "Zeitzone",
+    nextRuns: "Nächste Ausführungen",
+    count: "Anzahl",
+    compare: "Zeitzonen vergleichen",
+    addZone: "Zeitzone hinzufügen",
+    remove: "Entfernen",
+    copy: "Kopieren",
+    copied: "Kopiert",
+    language: "Sprache",
+    relative: "in",
+    builderNeedsFive: "Der Builder unterstützt nur 5-Feld-Ausdrücke.",
+    months: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+    weekdays: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+  },
+  en: {
+    title: "CronCraft",
+    subtitle: "Build, understand and test cron expressions",
+    expression: "Cron expression",
+    expressionHint: "5 fields (minute hour day month weekday) or 6 fields with seconds",
+    meaning: "Meaning",
+    invalid: "Invalid expression",
+    presets: "Presets",
+    builder: "Visual builder",
+    minute: "Minute",
+    hour: "Hour",
+    dayOfMonth: "Day of month",
+    month: "Month",
+    dayOfWeek: "Day of week",
+    every: "Every",
+    everyN: "Every N",
+    specific: "Specific values",
+    custom: "Custom value",
+    step: "Step",
+    timezone: "Time zone",
+    nextRuns: "Next executions",
+    count: "Count",
+    compare: "Compare time zones",
+    addZone: "Add time zone",
+    remove: "Remove",
+    copy: "Copy",
+    copied: "Copied",
+    language: "Language",
+    relative: "in",
+    builderNeedsFive: "The builder only supports 5-field expressions.",
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  },
+} as const;
+
+export type Messages = (typeof messages)["de"];
+
+export function getMessages(locale: Locale): Messages {
+  return messages[locale] as unknown as Messages;
+}
