@@ -40,7 +40,7 @@ export function WeekGrid({ expression, timezone, now, t }: Props) {
         <p className="text-sm text-ink-soft">{empty ? t.noRuns : t.weekHelp}</p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-[3px]">
           <caption className="sr-only">
             {t.week} ({timezone})
