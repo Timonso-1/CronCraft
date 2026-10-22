@@ -85,7 +85,16 @@ export function CronCraft() {
       {
         label: t.statNext,
         value: runs[0] ? relativeTime(runs[0].timestamp, now, locale) : t.statNone,
-        hint: runs[0]?.local.slice(0, 16),
+        hint: runs[0]
+          ? new Intl.DateTimeFormat(locale, {
+              timeZone: primary,
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(runs[0].timestamp))
+          : undefined,
         accent: Boolean(runs[0]),
       },
       { label: t.statToday, value: grid ? fmt(sum(grid[0].hours)) : "-" },

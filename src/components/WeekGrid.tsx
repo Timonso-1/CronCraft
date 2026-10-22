@@ -12,7 +12,7 @@ interface Props {
 
 /** Deckkraft je Anzahl: 1 Ausführung ist klar sichtbar, 60 sind voll. */
 function intensity(n: number) {
-  return Math.round(45 + (55 * Math.log(n)) / Math.log(MAX_PER_HOUR));
+  return Math.round(70 + (30 * Math.log(n)) / Math.log(MAX_PER_HOUR));
 }
 
 function cellBackground(n: number) {

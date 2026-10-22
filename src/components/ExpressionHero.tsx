@@ -80,10 +80,10 @@ export function ExpressionHero({ expression, onChange, description, activeField,
 
       <div id="expr-meaning" aria-live="polite" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
         {description.ok ? (
-          <p className="text-lg font-medium">{description.text}</p>
+          <p className="text-xl font-medium tracking-tight">{description.text}</p>
         ) : (
           <>
-            <p className="text-lg font-medium text-danger">{t.invalid}</p>
+            <p className="text-xl font-medium tracking-tight text-danger">{t.invalid}</p>
             <p className="text-sm text-ink-soft">
               {description.text}. {t.invalidHelp}
             </p>
