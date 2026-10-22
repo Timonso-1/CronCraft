@@ -3,9 +3,9 @@
 import { FIELD_RANGES, type FieldKey, fieldToList, listToField } from "@/lib/cron/builder";
 import type { Messages } from "@/lib/i18n";
 
-type Mode = "every" | "step" | "specific" | "custom";
+export type Mode = "every" | "step" | "specific" | "custom";
 
-function detectMode(value: string): Mode {
+export function detectMode(value: string): Mode {
   if (value === "*") return "every";
   if (/^\*\/\d+$/.test(value)) return "step";
   if (fieldToList(value) !== null) return "specific";
@@ -19,23 +19,24 @@ interface Props {
   t: Messages;
 }
 
+const control =
+  "rounded-[10px] border border-rule bg-paper px-3 py-2 font-mono text-sm text-ink focus:border-(--c) outline-none";
+
 export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
   const mode = detectMode(value);
   const { min, max } = FIELD_RANGES[fieldKey];
-  const labelFor = (n: number): string => {
-    if (fieldKey === "month") return t.months[n - 1];
-    if (fieldKey === "dayOfWeek") return t.weekdays[n];
-    return String(n);
-  };
-  const values: number[] = [];
-  for (let i = min; i <= max; i++) values.push(i);
   const selected = fieldToList(value) ?? [];
+  const values = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+
+  const labelFor = (n: number) =>
+    fieldKey === "month" ? t.months[n - 1] : fieldKey === "dayOfWeek" ? t.weekdays[n] : String(n);
 
   const setMode = (m: Mode) => {
+    if (m === mode) return;
     if (m === "every") onChange("*");
-    else if (m === "step") onChange("*/5");
+    else if (m === "step") onChange(fieldKey === "minute" ? "*/15" : "*/2");
     else if (m === "specific") onChange(String(min));
-    else onChange(value);
+    else onChange(value === "*" ? `${min}-${max}` : value);
   };
 
   const toggle = (n: number) => {
@@ -50,10 +51,20 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
     { id: "custom", label: t.custom },
   ];
 
+  const gridCols =
+    fieldKey === "minute"
+      ? "grid-cols-6 sm:grid-cols-10"
+      : fieldKey === "hour"
+        ? "grid-cols-6 sm:grid-cols-12"
+        : fieldKey === "dayOfMonth"
+          ? "grid-cols-7"
+          : fieldKey === "month"
+            ? "grid-cols-4 sm:grid-cols-6"
+            : "grid-cols-7";
+
   return (
-    <fieldset className="rounded-lg border border-black/10 p-3 dark:border-white/15">
-      <legend className="px-1 text-sm font-medium">{t[fieldKey]}</legend>
-      <div className="mb-2 flex flex-wrap gap-1" role="radiogroup" aria-label={t[fieldKey]}>
+    <div className="space-y-4">
+      <div role="radiogroup" aria-label={t[fieldKey]} className="inline-flex rounded-[10px] bg-paper p-1">
         {modes.map((m) => (
           <button
             key={m.id}
@@ -61,10 +72,8 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
             role="radio"
             aria-checked={mode === m.id}
             onClick={() => setMode(m.id)}
-            className={`rounded-md px-2 py-1 text-xs ${
-              mode === m.id
-                ? "bg-foreground text-background"
-                : "border border-black/10 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className={`rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors ${
+              mode === m.id ? "bg-(--c) text-sheet" : "text-ink-soft hover:text-ink"
             }`}
           >
             {m.label}
@@ -72,50 +81,67 @@ export function FieldEditor({ fieldKey, value, onChange, t }: Props) {
         ))}
       </div>
 
+      {mode === "every" && <p className="text-ink-soft">{t.everyText[fieldKey]}</p>}
+
       {mode === "step" && (
-        <label className="flex items-center gap-2 text-sm">
-          {t.step}
+        <label className="flex items-center gap-3">
+          <span>{t.step}</span>
           <input
             type="number"
             min={1}
             max={max}
             value={Number(value.slice(2))}
-            onChange={(e) => onChange(`*/${Math.max(1, Number(e.target.value) || 1)}`)}
-            className="w-20 rounded-md border border-black/15 bg-transparent px-2 py-1 dark:border-white/20"
+            onChange={(e) => onChange(`*/${Math.min(max, Math.max(1, Number(e.target.value) || 1))}`)}
+            className={`${control} w-24`}
           />
+          <span>{t.stepUnit[fieldKey]}</span>
         </label>
       )}
 
       {mode === "specific" && (
-        <div className="flex flex-wrap gap-1">
-          {values.map((n) => (
+        <div className="space-y-2">
+          <div className={`grid gap-1.5 ${gridCols}`}>
+            {values.map((n) => {
+              const on = selected.includes(n);
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggle(n)}
+                  className={`rounded-[8px] py-2 text-sm tabular-nums transition-colors ${
+                    on ? "bg-(--c) font-semibold text-sheet" : "bg-paper text-ink hover:bg-(--c)/15"
+                  }`}
+                >
+                  {labelFor(n)}
+                </button>
+              );
+            })}
+          </div>
+          {selected.length > 0 && (
             <button
-              key={n}
               type="button"
-              aria-pressed={selected.includes(n)}
-              onClick={() => toggle(n)}
-              className={`min-w-8 rounded-md px-1.5 py-1 text-xs ${
-                selected.includes(n)
-                  ? "bg-foreground text-background"
-                  : "border border-black/10 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
-              }`}
+              onClick={() => onChange("*")}
+              className="text-sm text-ink-soft underline underline-offset-4 hover:text-ink"
             >
-              {labelFor(n)}
+              {t.clear}
             </button>
-          ))}
+          )}
         </div>
       )}
 
       {mode === "custom" && (
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md border border-black/15 bg-transparent px-2 py-1 font-mono text-sm dark:border-white/20"
-          aria-label={t[fieldKey]}
-        />
+        <div className="space-y-2">
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value.replace(/\s/g, ""))}
+            aria-label={t[fieldKey]}
+            spellCheck={false}
+            className={`${control} w-full max-w-xs`}
+          />
+          <p className="text-sm text-ink-soft">{t.customHelp}</p>
+        </div>
       )}
-
-      <p className="mt-2 font-mono text-xs opacity-60">{value}</p>
-    </fieldset>
+    </div>
   );
 }
