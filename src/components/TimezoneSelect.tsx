@@ -30,7 +30,7 @@ export function TimezoneSelect({ value, onChange, label, className = "" }: Props
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`max-w-full rounded-[10px] border border-rule bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-ink ${className}`}
+      className={`max-w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-accent/70 ${className}`}
     >
       {options.map((z) => (
         <option key={z} value={z}>
