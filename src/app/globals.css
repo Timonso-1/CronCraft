@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
+/*
+ * CronCraft Design-Tokens
+ * Kühles Blaugrau als Grund, Tinte als Text, je Cron-Feld ein eigener Farbton.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --paper: #e9edf3;
+  --sheet: #f7f9fc;
+  --ink: #16213a;
+  --ink-soft: #4b5873;
+  --rule: #cdd5e1;
+  --danger: #c0262d;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --f-second: #5b6b86;
+  --f-minute: #2f5bea;
+  --f-hour: #b8235a;
+  --f-dom: #0e8a72;
+  --f-month: #7a4be0;
+  --f-dow: #b67d00;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #0f1628;
+    --sheet: #172036;
+    --ink: #e6ebf5;
+    --ink-soft: #9aa6be;
+    --rule: #2a3550;
+    --danger: #ff6b70;
+
+    --f-second: #8d9bb5;
+    --f-minute: #7d9cff;
+    --f-hour: #ff6fa3;
+    --f-dom: #3fd0b0;
+    --f-month: #b49aff;
+    --f-dow: #f2b84b;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-danger: var(--danger);
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
+  font-optical-sizing: auto;
+}
+
+:focus-visible {
+  outline: 2px solid var(--f-minute);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--f-minute) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
