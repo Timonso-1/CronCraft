@@ -2,7 +2,6 @@
 
 import { Builder } from "@/components/Builder";
 import { ExpressionHero } from "@/components/ExpressionHero";
-import { FieldLegend } from "@/components/FieldLegend";
 import { Footer } from "@/components/Footer";
 import { NextRuns } from "@/components/NextRuns";
 import { Stats } from "@/components/Stats";
@@ -21,6 +20,7 @@ import { relativeTime } from "@/lib/relative";
 import { useEffect, useMemo, useState } from "react";
 
 const DEFAULT_EXPRESSION = "0 9 * * 1-5";
+const SIMPLE_PRESETS = ["every-5-min", "hourly", "daily-midnight", "weekdays-9", "weekly-monday", "monthly-first"];
 
 export function CronCraft() {
   const [locale, setLocale] = useState<Locale>("de");
@@ -71,10 +71,7 @@ export function CronCraft() {
 
   const fields = useMemo(() => expressionToFields(expression), [expression]);
 
-  const selectField = (field: FieldKey) => {
-    setActiveField(field);
-    document.getElementById("editor")?.scrollIntoView({ block: "nearest" });
-  };
+
   const minute = Math.floor(now / 60_000);
 
   const grid = useMemo(() => {
@@ -106,7 +103,6 @@ export function CronCraft() {
           : t.statNextHint,
         accent: Boolean(runs[0]),
       },
-      { label: t.statToday, value: grid ? fmt(sum(grid[0].hours)) : "-", hint: t.statTodayHint },
       { label: t.statWeek, value: grid ? fmt(grid.reduce((a, d) => a + sum(d.hours), 0)) : "-", hint: t.statWeekHint },
       {
         label: t.statGap,
@@ -116,37 +112,21 @@ export function CronCraft() {
     ];
   }, [expression, primary, now, locale, grid, t]);
 
-  const today = new Intl.DateTimeFormat(locale, {
-    timeZone: primary,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(now));
-
   return (
     <>
       <TopBar locale={locale} onLocaleChange={setLocale} t={t} />
 
       <main className="mx-auto max-w-7xl space-y-14 px-4 pt-8 sm:px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              <span className="text-ink-soft">{t.headlineA}</span> {t.headlineB}
-            </h1>
-            <p className="mt-1 text-sm text-ink-soft">{t.lead}</p>
-          </div>
-          <p suppressHydrationWarning className="text-xs font-medium tracking-[0.12em] text-ink-soft uppercase">
-            {ready ? today : ""}
-          </p>
-        </div>
+        <h1 className="sr-only">
+          {t.title}: {t.subtitle}
+        </h1>
 
         <Step number={1} title={t.step1Title} subtitle={t.step1Sub}>
           <ExpressionHero expression={expression} onChange={setExpression} description={description} activeField={activeField} t={t} />
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="mr-1 text-xs font-medium tracking-wider text-ink-soft uppercase">{t.presetsLabel}</span>
-            {PRESETS.map((p) => {
+            {PRESETS.filter((p) => SIMPLE_PRESETS.includes(p.id)).map((p) => {
               const active = p.expression === expression.trim();
               return (
                 <button
@@ -166,24 +146,17 @@ export function CronCraft() {
             })}
           </div>
 
-          <FieldLegend expression={expression} activeField={activeField} onSelectField={selectField} t={t} />
         </Step>
 
         <Step number={2} title={t.step2Title} subtitle={t.step2Sub}>
-          <div className="grid gap-6 lg:grid-cols-12">
-            <div className="min-w-0 lg:col-span-7">
-              <Builder
-                fields={fields}
-                onChange={(f) => setExpression(fieldsToExpression(f))}
-                active={activeField}
-                onActiveChange={setActiveField}
-                t={t}
-              />
-            </div>
-            <div className="min-w-0 lg:col-span-5">
-              <SyntaxHelp onTry={setExpression} t={t} />
-            </div>
-          </div>
+          <Builder
+            fields={fields}
+            onChange={(f) => setExpression(fieldsToExpression(f))}
+            active={activeField}
+            onActiveChange={setActiveField}
+            t={t}
+          />
+          <SyntaxHelp onTry={setExpression} t={t} />
         </Step>
 
         <Step number={3} title={t.step3Title} subtitle={t.step3Sub}>
