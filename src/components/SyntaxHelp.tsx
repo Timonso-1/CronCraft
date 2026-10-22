@@ -21,7 +21,7 @@ export function SyntaxHelp({ onTry, t }: Props) {
   return (
     <Card id="syntax" title={t.syntaxTitle} subtitle={t.syntaxSub} bodyClassName="">
       <div className="overflow-x-auto border-b border-rule p-5">
-        <pre className="font-mono text-[13px] leading-6" aria-label="* * * * *">
+        <pre className="font-mono text-[14px] leading-[1.25]" aria-label="* * * * *">
           {DIAGRAM_FIELDS.map((f, i) => (
             <span key={f.key} className="block">
               {DIAGRAM_FIELDS.slice(0, i).map((p) => (
